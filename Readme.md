@@ -1,5 +1,14 @@
 # Vevor Lift Control
 
+**Progress**
+
+- [x] Understand Wireless Remote Communications
+- [x] Understand Wired Remote Communications
+- [ ] Design alternate solution to control lift from 
+- [ ] Integrate with Home Assitant and control from HA
+- [ ] Automate raise/lower of TV based on TV state
+
+
 I got a Vevor TV lift which is working great. But I have a tendency to turn off the TV and not lower it back down. I really want to have it automatically retract if the TV has been off for more than 10 minutes.
 
 I asked Vevor if there were a way to integrate this with one of the home automation solutions (like Home Assistant). They responded with:
@@ -17,7 +26,6 @@ Jennifer Customer Support
 ```
 
 So..... I guess I have to figure this out on my own. The rest of this document are my notes about the journey to automating the TV lift.
-
 
 
 ![Vevor TV Lift Image](./images/vevor_ift_product_image.jpg)
@@ -78,17 +86,24 @@ I tried to search for `XK7BH` but did not find anything helpful.
 
 **Raw Encoder Samples**
 
-* Going Up [encoder_raise.txt](./raw_serial_captures/encoder_raise.txt)
-* Going Down [encoder_lower.txt](./raw_serial_captures/encoder_lower.txt)
+* Going Up [`encoder_raise.txt`](./raw_serial_captures/encoder_raise.txt)
+* Going Down [`encoder_lower.txt`](./raw_serial_captures/encoder_lower.txt)
 
+## Serial Data
+
+This is from lift to wired remote:
 
 * `0x55 aa a6 bd 1d 00` Encoder Top (173)
 * `0x55 aa a5 8c 0c 00` Encoder Bottom (73.0)
 
+The lift is continuously sending data to wired remote. See [`encoder_at_bottom.txt`](./raw_serial_captures/encoder_at_bottom.txt) for example of lift sitting at its lowered position.
+
 
 ### Button Presses
 
-* `0x55 0xFC` seems to be sent ~20 seconds after pressing a button
+This data is from wired remote to lift:
+
+* `0x55 0xFC` seems to be sent ~20 seconds after pressing a button. The remotes LED display turns off when this is sent.
 * `0x55 0xaa 0xf0 0xf0 0xf0` seems to be sent on button press if a button has not been pressed for a while. User needs to press button again for action to proceed.
 
 
