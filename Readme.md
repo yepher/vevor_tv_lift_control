@@ -1,15 +1,6 @@
-# Vevor Lift Control
+# Vevor TV Lift Control
 
-youtube-embed
-{
-   "width": "560",
-   "height": "315",
-   "src": "https://www.youtube.com/embed/0HHHwE2EETI",
-   "title": "Vevor TV Lift",
-   "frameborder": "0",
-   "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-   "allowfullscreen": true
-}
+[![Vevor TV Lift](https://img.youtube.com/vi/0HHHwE2EETI/0.jpg)](https://www.youtube.com/watch?v=0HHHwE2EETI)
 
 
 
