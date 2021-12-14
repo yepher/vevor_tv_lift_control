@@ -1,6 +1,6 @@
 # Vevor Lift Control
 
-```youtube-embed
+youtube-embed
 {
    "width": "560",
    "height": "315",
@@ -10,7 +10,7 @@
    "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
    "allowfullscreen": true
 }
-```
+
 
 
 **Progress**
