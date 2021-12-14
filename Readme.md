@@ -1,6 +1,16 @@
 # Vevor Lift Control
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/0HHHwE2EETI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+```youtube-embed
+{
+   "width": "560",
+   "height": "315",
+   "src": "https://www.youtube.com/embed/0HHHwE2EETI",
+   "title": "Vevor TV Lift",
+   "frameborder": "0",
+   "allow": "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+   "allowfullscreen": true
+}
+```
 
 
 **Progress**
