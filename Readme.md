@@ -1,5 +1,8 @@
 # Vevor Lift Control
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/0HHHwE2EETI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
 **Progress**
 
 - [x] Understand Wireless Remote Communications
@@ -9,7 +12,7 @@
 - [ ] Automate raise/lower of TV based on TV state
 
 
-I got a Vevor TV lift which is working great. But I have a tendency to turn off the TV and not lower it back down. I really want to have it automatically retract if the TV has been off for more than 10 minutes.
+I have a Vevor TV lift which is working great. But I have a tendency to turn off the TV and not lower it back down. I really want to have it automatically retract if the TV has been off for more than 10 minutes.
 
 I asked Vevor if there were a way to integrate this with one of the home automation solutions (like Home Assistant). They responded with:
 
@@ -73,6 +76,22 @@ And this is the back of the circuit board
 
 ![Wired Remote Back Circuit Board](./images/wiredRemote_003.JPG)
 
+The RJ45 pin out is:
+
+![RJ45 Pins](./images/RJ45.png)
+
+| RJ45<br>Pin # | Board Connector<br>Pin # | Wire<br>Color | Description |
+|---|---|---|---|
+|1 | 2 | Red | `RxD_3` |
+|2 | 3 | Yellow | `TxD` |
+|3 | 6 | White | `Ground` |
+|4 | 4 | Green | `RxD` |
+|5 | 5 | Black | `5.0V`|
+|6 | - | - | Not connected |
+|7 | - | - | Not connected |
+|8 | 1 | Brown | `TxD_3` |
+
+
 I tried to search for `XK7BH` but did not find anything helpful.
 
 
@@ -80,7 +99,7 @@ I tried to search for `XK7BH` but did not find anything helpful.
 
 - micro-controller [STC 8H1K16](https://www.stcmicro.com/datasheet/STC8F-en.pdf)
 - Voltage Regulator [AMS 1117](http://www.advanced-monolithic.com/pdf/ds1117.pdf) `5.0v`->`3.3v`
-* My "dumb" wuestion about decoding data stream [Electric Overflow](https://electronics.stackexchange.com/questions/599134/how-decode-serial-data-stream?noredirect=1#comment1574777_599134) I was so fixated on the physical wiring I overlooked the obvious I did not finish writing the code I needed to actually see the data. I was just printing the Len (DOH!!!)
+* My "dumb" question about decoding data stream [Electric Overflow](https://electronics.stackexchange.com/questions/599134/how-decode-serial-data-stream?noredirect=1#comment1574777_599134) I was so fixated on the physical wiring I overlooked the obvious I did not finish writing the code I needed to actually see the data. I was just printing the Len (DOH!!!)
 
 ### Encoder
 
