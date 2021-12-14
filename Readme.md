@@ -38,7 +38,7 @@ So..... I guess I have to figure this out on my own. The rest of this document a
 
 ## Wireless Remote
 
-There is wireless remote that comes with the unit. After taking apart and looking inside I was able to determine it uses RF (`RLink`) to control the lift. I broke out my handy software defined radio and did a capture of the signal of `UP`. Then I replayed it through the SDR and the unit raised up. So if all else fails I can just trigger the unit with an RF signal. The signal looks like a 433 MHz AM signal.
+There is wireless remote that comes with the unit. After taking apart and looking inside I was able to determine it uses RF (`RLink`) to control the lift. The signal looks like a 433 MHz AM signal.
 
 But the wired remote has some sort of encoder readout which may make for more interesting automation.
 
