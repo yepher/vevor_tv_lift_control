@@ -1,5 +1,6 @@
 # Vevor TV Lift Control
 
+_(click image to see short YouTube video of lift in action)_
 [![Vevor TV Lift](https://img.youtube.com/vi/0HHHwE2EETI/0.jpg)](https://www.youtube.com/watch?v=0HHHwE2EETI)
 
 
