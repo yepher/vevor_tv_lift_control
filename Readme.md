@@ -5,6 +5,12 @@ _(click image to see short YouTube video of lift in action)_
 
 
 
+Here is example of it connected to [LiveKit](https://livekit.io) for voice control:
+
+_(click image to see short YouTube video of agent controlling a TV lift)_  
+[![Hide/Unhide TV](https://img.youtube.com/vi/mcz0MOzswV0/0.jpg)](https://youtu.be/mcz0MOzswV0)
+
+
 **Progress**
 
 - [x] Understand Wireless Remote Communications
@@ -59,7 +65,8 @@ This is what the circuit board looks like
 
 ## Wired Control
 
-There is a "wired remote" that has a series of buttons to control the lift. It also has a numeric reading that indicates the lifts heigh in some way but I am not sure what the units are. For mine all the way down is `73.0` and all the way up is `173`. The "Wired Remote" connects to the lift controller with an RJ45 jack.
+There is a "wired remote" that has a series of buttons to control the lift. It also has a numeric reading that indicates the lift height in centimeters. The displayed value represents the height from the top of the lift platform to the base. For mine all the way down is `73.0` cm (28.74") and all the way up is `173` cm (68.11"). The "Wired Remote" connects to the lift controller with an RJ45 jack.
+
 
 The numbered keys are memory positions and the arrow buttons moves the lift up and down.
 
@@ -93,6 +100,10 @@ The RJ45 pin out is:
 |7 | - | - | Not connected |
 |8 | 1 | Brown | `TxD_3` |
 
+**Serial Communication:**
+- Baud rate: 9600
+- Use pins 2 (`TxD`) and 4 (`RxD`) for communication with the lift controller
+- Ground on pin 3, +5V on pin 5
 
 I tried to search for `XK7BH` but did not find anything helpful.
 
@@ -112,30 +123,91 @@ I tried to search for `XK7BH` but did not find anything helpful.
 
 ## Serial Data
 
-This is from lift to wired remote:
+### Protocol Summary
 
-* `0x55 aa a6 bd 1d 00` Encoder Top (173)
-* `0x55 aa a5 8c 0c 00` Encoder Bottom (73.0)
+Communication between the lift controller and wired remote uses a serial protocol over RJ45:
 
-The lift is continuously sending data to wired remote. See [`encoder_at_bottom.txt`](./raw_serial_captures/encoder_at_bottom.txt) for example of lift sitting at its lowered position.
+- **Lift → Remote**: Continuous 6-byte status frames containing position data
+- **Remote → Lift**: 2-byte or 5-byte command frames for button presses and display control
 
+See [`encoder_at_bottom.txt`](./raw_serial_captures/encoder_at_bottom.txt) for example of lift continuously sending status frames.
 
-### Button Presses
+### Lift → Remote: Status Frames
 
-This data is from wired remote to lift:
+**Frame Layout:**
+```
+55 AA TT LL HH SS
+```
 
-* `0x55 0xFC` seems to be sent ~20 seconds after pressing a button. The remotes LED display turns off when this is sent.
-* `0x55 0xaa 0xf0 0xf0 0xf0` seems to be sent on button press if a button has not been pressed for a while. User needs to press button again for action to proceed.
+- `55 AA` = Sync/header bytes
+- `TT` = Message type (observed: `0xA5`, `0xA6`; `0xA5` identifies position frames)
+- `LL HH` = Position (little-endian uint16, bytes 4-5, 1-indexed)
+- `SS` = Movement status: `0x04` when moving, `0x00` when stopped
 
+**Position Decoding:**
+
+The position is encoded in bytes 4-5 (1-indexed; bytes 3-4 in 0-indexed) as a little-endian uint16. The raw value maps to display units (centimeters) via:
+
+```
+display_position_cm = uint16_le(byte4, byte5) / 44.0
+```
+
+The position value represents height from the top of the lift platform to the base in centimeters.
+
+**Examples:**
+
+- Top position: `55 aa a6 bd 1d 00`
+  - Raw: `0xBD1D` (little-endian) = `0x1DBD` = 7613
+  - Display: 7613 / 44 = 173.0 cm
+
+- Bottom position: `55 aa a5 8c 0c 00`
+  - Raw: `0x8C0C` (little-endian) = `0x0C8C` = 3212
+  - Display: 3212 / 44 = 73.0 cm
+
+### Remote → Lift: Command Frames
+
+**Frame Layouts:**
+
+- **Button press**: `55 AA XX XX XX`
+  - `55 AA` = Sync/header bytes
+  - `XX XX XX` = Opcode repeated 3× (no checksum observed; triple repetition for reliability)
+
+- **Wake/priming**: `55 AA F0 F0 F0`
+  - Sent on button press if remote has been idle
+  - User must press button again for action to proceed
+  - Note: Some implementations may not use this command
+
+- **Display sleep**: `55 FC`
+  - Sent ~20 seconds after last button press
+  - Remote LED display turns off when this is sent
+
+**Button Command Table:**
 
 | **Key** | **Code** | **Notes**|
 |---|---|---|
-| `1` | `0x55 0xaa 0xd1 0xd1 0xd1` | |
-| `2` | `0x55 0xaa 0xd2 0xd2 0xd2` | |
-| `3` | `0x55 0xaa 0xd3 0xd3 0xd3` | |
-| `4` | `0x55 0xaa 0xd7 0xd7 0xd7` | |
-| `Up` | `0x55 0xaa 0xe3 0xe3 0xe3` <br> `0x55 0xaa 0xe1 0xe1 0xe1` | Press<br>Release |
-| `Down` | `0x55 0xaa 0xe2 0xe2 0xe2` <br> `0x55 0xaa 0xe3 0xe3 0xe3` | Press<br>Release |
+| `1` | `55 AA D1 D1 D1` | |
+| `2` | `55 AA D2 D2 D2` | |
+| `3` | `55 AA D3 D3 D3` | |
+| `4` | `55 AA D7 D7 D7` | |
+| `Up` | `55 AA E3 E3 E3` | Press |
+| `Up` | `55 AA E1 E1 E1` | Release |
+| `Down` | `55 AA E2 E2 E2` | Press |
+| `Down` | `55 AA E3 E3 E3` | Release |
+
+### Parsing / Resync Notes
+
+- Re-sync by scanning for `0x55 0xAA` sequence and reading the next 4 bytes
+- Validate `TT` byte in status frames: should be `0xA5` or `0xA6` to discard noise
+- Use `SS` byte to detect movement state: `0x04` = moving, `0x00` = stopped
+- Range-check decoded position values (e.g., 70-180 cm) to filter invalid frames
+- Button command frames repeat the opcode 3× for reliability; all three bytes should match
+
+### Implementation Notes
+
+- [cous](https://community.home-assistant.io/t/brand-new-to-home-assistant/367252/16?u=yepher) Tested successfully with serial communication at 9600 baud using pins 2 (TxD) and 4 (RxD)
+- Button commands work correctly to emulate button presses
+- Position frames stream continuously from the lift controller
+- The wired remote can be removed and replaced with a microcontroller (e.g., ESP32) for control and monitoring
 
 
 **TO BE CONTINUED....**
