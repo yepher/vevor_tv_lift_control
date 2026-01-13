@@ -15,8 +15,9 @@ _(click image to see short YouTube video of agent controlling a TV lift)_
 
 - [x] Understand Wireless Remote Communications
 - [x] Understand Wired Remote Communications
-- [ ] Design alternate solution to control lift from 
-- [ ] Integrate with Home Assitant and control from HA
+- [x] Design alternate solution to control lift (ESP32 implementation)
+- [ ] Integrate with Home Assistant and control from HA
+    - See comment from [Ginxo](https://github.com/yepher/vevor_tv_lift_control/issues/1#issuecomment-3570308709) for HomeAssistant Integration
 - [ ] Automate raise/lower of TV based on TV state
 
 
@@ -47,7 +48,7 @@ So..... I guess I have to figure this out on my own. The rest of this document a
 
 There is wireless remote that comes with the unit. After taking apart and looking inside I was able to determine it uses RF (`RLink`) to control the lift. The signal looks like a 433 MHz AM signal.
 
-But the wired remote has some sort of encoder readout which may make for more interesting automation.
+**Note:** RF cloning (e.g., with Broadlink RM Pro) works well for basic up/down control, but **memory position functions (1-4) do not work via RF cloning** - the lift will only raise to maximum or lower to minimum height. To use memory positions, you must use the wired remote or interface directly with the lift controller via serial communication (see [ESP32 implementation](./esp32/README.md) for an example).
 
 This is what the wireless remote looks like
 
@@ -205,9 +206,10 @@ The position value represents height from the top of the lift platform to the ba
 ### Implementation Notes
 
 - [cous](https://community.home-assistant.io/t/brand-new-to-home-assistant/367252/16?u=yepher) Tested successfully with serial communication at 9600 baud using pins 2 (TxD) and 4 (RxD)
-- Button commands work correctly to emulate button presses
+- Button commands work correctly to emulate button presses, including all memory positions (1-4)
 - Position frames stream continuously from the lift controller
 - The wired remote can be removed and replaced with a microcontroller (e.g., ESP32) for control and monitoring
+- See the [ESP32 implementation](./esp32/README.md) for a complete solution that provides web interface control and can be integrated with home automation systems (MQTT, Home Assistant, etc.)
 
 
 **TO BE CONTINUED....**
